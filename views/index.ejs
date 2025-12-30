@@ -1,0 +1,63 @@
+<%- include("partials/header") %>
+
+<div class="p-5 mb-4 bg-light rounded-3 shadow-sm text-center">
+    <div class="container-fluid py-3">
+        <h1 class="display-5 fw-bold">Welcome to HotelManager</h1>
+        <p class="col-md-8 fs-4 mx-auto">Explore the world's most beautiful destinations.</p>
+        
+        <div class="card p-3 mt-4 mx-auto shadow-sm" style="max-width: 600px;">
+            <form action="/hotels" method="GET" class="row g-3 align-items-center justify-content-center">
+                <div class="col-auto">
+                    <label class="visually-hidden">Min Rating</label>
+                    <select name="minRating" class="form-select">
+                        <option value="">All Ratings</option>
+                        <option value="5" <%= (locals.search && search.minRating === '5') ? 'selected' : '' %>>5 Stars</option>
+                        <option value="4" <%= (locals.search && search.minRating === '4') ? 'selected' : '' %>>4+ Stars</option>
+                        <option value="3" <%= (locals.search && search.minRating === '3') ? 'selected' : '' %>>3+ Stars</option>
+                    </select>
+                </div>
+                <div class="col-auto">
+                    <label class="visually-hidden">Max Price</label>
+                    <input type="number" name="maxPrice" class="form-control" placeholder="Max Price (₹)" 
+                           value="<%= (locals.search && search.maxPrice) ? search.maxPrice : '' %>">
+                </div>
+                <div class="col-auto">
+                    <button type="submit" class="btn btn-primary">Filter</button>
+                    <a href="/hotels" class="btn btn-outline-secondary">Reset</a>
+                </div>
+            </form>
+        </div>
+        </div>
+</div>
+
+<div class="row row-cols-1 row-cols-md-3 g-4">
+    <% hotels.forEach(function(hotel){ %>
+        <div class="col">
+            <div class="card h-100 shadow-sm border-0">
+                <img src="<%= hotel.image %>" class="card-img-top" alt="<%= hotel.name %>">
+                <div class="card-body d-flex flex-column">
+                    
+                    <div class="d-flex justify-content-between align-items-start">
+                        <h5 class="card-title fw-bold"><%= hotel.name %></h5>
+                        <% if(hotel.averageRating === 0 || hotel.reviews.length === 0) { %>
+                             <span class="badge bg-secondary">New</span>
+                        <% } else { %>
+                             <span class="badge bg-warning text-dark">
+                                ★ <%= hotel.averageRating.toFixed(1) %>
+                             </span>
+                        <% } %>
+                    </div>
+
+                    <p class="card-text text-muted"><%= hotel.description.substring(0, 80) %>...</p>
+                    
+                    <div class="mt-auto d-flex justify-content-between align-items-center">
+                        <span class="badge bg-success fs-6">₹<%= hotel.price %>/night</span>
+                        <a href="/hotels/<%= hotel._id %>" class="btn btn-outline-primary btn-sm">More Info</a>
+                    </div>
+                </div>
+            </div>
+        </div>
+    <% }); %>
+</div>
+
+<%- include("partials/footer") %>

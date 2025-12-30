@@ -1,0 +1,32 @@
+<%- include("../partials/header") %>
+
+<div class="row justify-content-center">
+    <div class="col-md-6">
+        <div class="card shadow">
+            <div class="card-header bg-warning text-center">
+                <h3>Edit Your Review</h3>
+            </div>
+            <div class="card-body">
+                <form action="/hotels/<%= hotelId %>/reviews/<%= review._id %>?_method=PUT" method="POST">
+                    <div class="mb-3">
+                        <label class="form-label">Rating</label>
+                        <select name="rating" class="form-select">
+                            <option value="5" <%= review.rating === 5 ? 'selected' : '' %>>5 Stars</option>
+                            <option value="4" <%= review.rating === 4 ? 'selected' : '' %>>4 Stars</option>
+                            <option value="3" <%= review.rating === 3 ? 'selected' : '' %>>3 Stars</option>
+                            <option value="2" <%= review.rating === 2 ? 'selected' : '' %>>2 Stars</option>
+                            <option value="1" <%= review.rating === 1 ? 'selected' : '' %>>1 Star</option>
+                        </select>
+                    </div>
+                    <div class="mb-3">
+                        <label class="form-label">Comment</label>
+                        <textarea name="text" class="form-control" rows="4"><%= review.text %></textarea>
+                    </div>
+                    <button class="btn btn-success w-100">Update Review</button>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>
+
+<%- include("../partials/footer") %>

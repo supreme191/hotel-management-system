@@ -1,0 +1,90 @@
+<%- include("partials/header") %>
+
+<div class="container mt-4">
+    <% if(typeof query !== 'undefined' && query.payment === 'success') { %>
+        <div class="alert alert-success alert-dismissible fade show" role="alert">
+            <strong>Payment Successful!</strong> Your booking has been confirmed.
+            <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+        </div>
+    <% } else if(typeof query !== 'undefined' && query.payment === 'error') { %>
+        <div class="alert alert-danger alert-dismissible fade show" role="alert">
+            <strong>Payment Error!</strong> There was an issue confirming your payment. Please contact support.
+            <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+        </div>
+    <% } %>
+    
+    <h2>My Bookings</h2>
+    
+    <% if(bookings.length === 0) { %>
+        <div class="alert alert-info">
+            <h4>No bookings yet</h4>
+            <p>You haven't made any hotel bookings. <a href="/hotels">Browse hotels</a> to make your first booking!</p>
+        </div>
+    <% } else { %>
+        <div class="row">
+            <% bookings.forEach(function(booking) { %>
+                <div class="col-md-6 mb-4">
+                    <div class="card">
+                        <div class="card-header d-flex justify-content-between align-items-center">
+                            <h5 class="mb-0"><%= booking.hotel.name %></h5>
+                            <span class="badge bg-<%= booking.status === 'confirmed' ? 'success' : booking.status === 'cancelled' ? 'danger' : 'warning' %>">
+                                <%= booking.status.charAt(0).toUpperCase() + booking.status.slice(1) %>
+                            </span>
+                        </div>
+                        <div class="card-body">
+                            <div class="row">
+                                <div class="col-md-6">
+                                    <p><strong>Check-in:</strong><br><%= booking.checkInDate.toDateString() %></p>
+                                    <p><strong>Check-out:</strong><br><%= booking.checkOutDate.toDateString() %></p>
+                                </div>
+                                <div class="col-md-6">
+                                    <p><strong>Rooms:</strong> <%= booking.numberOfRooms %></p>
+                                    <p><strong>Total:</strong> ₹<%= booking.totalPrice %></p>
+                                </div>
+                            </div>
+                            
+                            <div class="mt-3">
+                                <span class="badge bg-<%= booking.paymentStatus === 'completed' ? 'success' : booking.paymentStatus === 'failed' ? 'danger' : 'warning' %>">
+                                    Payment: <%= booking.paymentStatus.charAt(0).toUpperCase() + booking.paymentStatus.slice(1) %>
+                                </span>
+                            </div>
+                            
+                            <div class="mt-3">
+                                <a href="/hotels/<%= booking.hotel._id %>" class="btn btn-outline-primary btn-sm">View Hotel</a>
+                                <% if(booking.status === 'confirmed' && booking.paymentStatus === 'completed') { %>
+                                    <% 
+                                        const hasReviewed = booking.hotel.reviews && booking.hotel.reviews.some(function(reviewId){
+                                            return currentUser && currentUser._id && reviewId.toString() === currentUser._id.toString();
+                                        });
+                                    %>
+                                    <% if(!hasReviewed) { %>
+                                        <a href="/hotels/<%= booking.hotel._id %>#reviews" class="btn btn-outline-success btn-sm">Write Review</a>
+                                    <% } else { %>
+                                        <span class="badge bg-success">Reviewed</span>
+                                    <% } %>
+                                <% } %>
+                                
+                                <% 
+                                    const oneWeekFromNow = new Date();
+                                    oneWeekFromNow.setDate(oneWeekFromNow.getDate() + 7);
+                                    const canCancel = booking.status !== 'cancelled' && booking.checkInDate > oneWeekFromNow;
+                                %>
+                                <% if(canCancel) { %>
+                                    <form action="/bookings/<%= booking._id %>/cancel" method="POST" class="d-inline">
+                                        <button class="btn btn-outline-danger btn-sm" onclick="return confirm('Are you sure you want to cancel this booking?')">Cancel Booking</button>
+                                    </form>
+                                <% } else if(booking.status !== 'cancelled') { %>
+                                    <small class="text-muted d-block mt-1">Cannot cancel within 1 week of check-in</small>
+                                <% } %>
+                            </div>
+                            
+                            <small class="text-muted">Booked on <%= booking.createdAt.toDateString() %></small>
+                        </div>
+                    </div>
+                </div>
+            <% }); %>
+        </div>
+    <% } %>
+</div>
+
+<%- include("partials/footer") %>

@@ -1,0 +1,96 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Hotel Manager</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <style>
+        /* STICKY FOOTER TRICK */
+        body {
+            display: flex;
+            flex-direction: column;
+            min-height: 100vh;
+            background-color: #f8f9fa;
+        }
+        main {
+            flex: 1;
+        }
+        .navbar-brand {
+            font-weight: 800; /* Made slightly bolder */
+            font-size: 1.5rem;
+            letter-spacing: 1px;
+        }
+        .nav-link {
+            font-weight: 500; /* Makes links pop a bit more */
+            margin: 0 5px;     /* Adds breathing room between links */
+        }
+        .card-img-top {
+            height: 200px;
+            object-fit: cover;
+        }
+    </style>
+</head>
+<body>
+    <nav class="navbar navbar-expand-lg navbar-dark bg-dark sticky-top">
+        <div class="container">
+            <a class="navbar-brand" href="/hotels">🏨 HotelManager</a>
+            
+            <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav">
+                <span class="navbar-toggler-icon"></span>
+            </button>
+            
+            <div class="collapse navbar-collapse" id="navbarNav">
+                
+                <ul class="navbar-nav mx-auto text-center"> 
+                    <li class="nav-item">
+                        <a class="nav-link" href="/hotels">Home</a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link" href="/about">About Us</a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link" href="/contact">Contact</a>
+                    </li>
+                    <% if(currentUser){ %>
+                        <% if(currentUser.isAdmin) { %>
+                            <li class="nav-item">
+                                <a class="nav-link" href="/my-hotels">My Hotels</a>
+                            </li>
+                        <% } %>
+                        <li class="nav-item">
+                            <a class="nav-link" href="/my-bookings">My Bookings</a>
+                        </li>
+                        <% if(currentUser.isAdmin) { %>
+                            <li class="nav-item">
+                                <a class="nav-link" href="/admin/bookings">All Bookings</a>
+                            </li>
+                        <% } %>
+                    <% } %>
+                </ul>
+
+                <ul class="navbar-nav ms-lg-auto text-center align-items-center">
+                    <% if(!currentUser){ %>
+                        <li class="nav-item"><a class="nav-link" href="/login">Login</a></li>
+                        <li class="nav-item">
+                            <a class="btn btn-outline-light btn-sm ms-2" href="/register">Sign Up</a>
+                        </li>
+                    <% } else { %>
+                        <li class="nav-item">
+                            <span class="navbar-text me-2">Hello, <%= currentUser.username %></span>
+                        </li>
+                        <li class="nav-item">
+                            <a class="nav-link" href="/logout">Logout</a>
+                        </li>
+                        <li class="nav-item ms-lg-2">
+                            <% if (currentUser && currentUser.isAdmin) { %>
+                                <a class="btn btn-primary btn-sm px-3" href="/hotels/new">+ Add Hotel</a>
+                            <% } %>
+                        </li>
+                    <% } %>
+                </ul>
+            </div>
+        </div>
+    </nav>
+    
+    <main class="container mt-4 mb-5">

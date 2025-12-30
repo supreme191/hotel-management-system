@@ -1,0 +1,139 @@
+<%- include("partials/header") %>
+
+<div class="row">
+    <div class="col-md-8">
+        <div class="card mb-4 shadow-sm">
+            <img src="<%= hotel.image %>" class="card-img-top" alt="...">
+            
+            <div class="card-body">
+                <div class="d-flex justify-content-between align-items-center mb-2">
+                    <h4 class="card-title m-0"><%= hotel.name %></h4>
+                    <h5 class="text-success m-0">₹<%= hotel.price %>/night</h5>
+                </div>
+
+                <div class="mb-3">
+                    <% if(hotel.averageRating > 0 && hotel.reviews.length > 0) { %>
+                        <span class="badge bg-warning text-dark fs-6 p-2">
+                            ★ <%= hotel.averageRating.toFixed(1) %> / 5
+                        </span>
+                        <span class="text-muted ms-2">(<%= hotel.reviews.length %> reviews)</span>
+                    <% } else { %>
+                        <span class="badge bg-secondary p-2">No reviews yet</span>
+                    <% } %>
+                </div>
+
+                <div class="mb-3">
+                    <p><strong>Total Rooms:</strong> <%= hotel.totalRooms %></p>
+                    <% if(hotel.amenities && hotel.amenities.length > 0) { %>
+                        <p><strong>Amenities:</strong> <%= hotel.amenities.join(', ') %></p>
+                    <% } %>
+                </div>
+
+                <p><%= hotel.description %></p>
+                <p class="text-muted">
+                    <em>Submitted by <%= hotel.author.username %></em>
+                </p>
+
+                <div class="mb-3">
+                    <% if(currentUser && !hotel.author.id.equals(currentUser._id) && !currentUser.isAdmin) { %>
+                        <a href="/hotels/<%= hotel._id %>/book" class="btn btn-success btn-lg me-2">Book Now</a>
+                    <% } %>
+                    
+                    <% if(currentUser && (hotel.author.id.equals(currentUser._id) || currentUser.isAdmin)){ %>
+                        <a class="btn btn-warning" href="/hotels/<%= hotel._id %>/edit">Edit</a>
+                        <form action="/hotels/<%= hotel._id %>?_method=DELETE" method="POST" class="d-inline">
+                            <button class="btn btn-danger">Delete</button>
+                        </form>
+                    <% } %>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="col-md-4">
+        <h3 id="reviews">Reviews</h3>
+        
+        <% 
+            const hasReviewed = currentUser && hotel.reviews.some(function(review){
+                return review.author.id.equals(currentUser._id);
+            });
+        %>
+
+        <% if(currentUser && hotel.author.id.equals(currentUser._id)) { %>
+            <div class="alert alert-warning">
+                You cannot rate your own hotel.
+            </div>
+
+        <% } else if (currentUser && currentUser.isAdmin) { %>
+            <div class="alert alert-info">
+                Admins can monitor reviews but cannot add reviews.
+            </div>
+
+        <% } else if (hasReviewed) { %>
+            <div class="alert alert-info">
+                You have already reviewed this hotel. <br>
+                <small>Edit or delete your existing review to change it.</small>
+            </div>
+
+        <% } else if (currentUser && !hasBooked) { %>
+            <div class="alert alert-warning">
+                You can only review hotels you have booked and stayed at. <br>
+                <small><a href="/hotels/<%= hotel._id %>/book">Book this hotel</a> to leave a review.</small>
+            </div>
+
+        <% } else if (currentUser) { %>
+            <form action="/hotels/<%= hotel._id %>/reviews" method="POST" class="mb-3">
+                <div class="mb-2">
+                    <label>Rating:</label>
+                    <select name="rating" class="form-select">
+                        <option value="5">5 Stars</option>
+                        <option value="4">4 Stars</option>
+                        <option value="3">3 Stars</option>
+                        <option value="2">2 Stars</option>
+                        <option value="1">1 Star</option>
+                    </select>
+                </div>
+                <div class="mb-2">
+                    <textarea name="text" class="form-control" placeholder="Write a review..." rows="3" required></textarea>
+                </div>
+                <button class="btn btn-success btn-sm w-100">Add Review</button>
+            </form>
+        
+        <% } else { %>
+            <div class="alert alert-light border">
+                <a href="/login">Login</a> to leave a review.
+            </div>
+        <% } %>
+
+        <hr>
+
+        <% hotel.reviews.forEach(function(review){ %>
+            <div class="card mb-2">
+                <div class="card-body py-2">
+                    <h6 class="card-title">
+                        <strong><%= review.author.username %></strong>
+                        <span class="float-end text-warning">
+                            <%= '★'.repeat(review.rating) %>
+                            <span class="text-muted" style="font-size: 0.8rem;">(<%= review.rating %>)</span>
+                        </span>
+                    </h6>
+                    <p class="card-text small"><%= review.text %></p>
+                    
+                    <div class="d-flex">
+                        <% if(currentUser && review.author.id.equals(currentUser._id)) { %>
+                            <a href="/hotels/<%= hotel._id %>/reviews/<%= review._id %>/edit" class="btn btn-sm btn-outline-warning me-2">Edit</a>
+                        <% } %>
+
+                        <% if(currentUser && (review.author.id.equals(currentUser._id) || currentUser.isAdmin)){ %>
+                            <form action="/hotels/<%= hotel._id %>/reviews/<%= review._id %>?_method=DELETE" method="POST">
+                                <button class="btn btn-sm btn-outline-danger">Delete</button>
+                            </form>
+                        <% } %>
+                    </div>
+                </div>
+            </div>
+        <% }) %>
+    </div>
+</div>
+
+<%- include("partials/footer") %>

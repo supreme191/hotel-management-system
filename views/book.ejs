@@ -1,0 +1,93 @@
+<%- include("partials/header") %>
+
+<div class="container mt-4">
+    <div class="row justify-content-center">
+        <div class="col-md-8">
+            <div class="card">
+                <div class="card-header">
+                    <h3>Book <%= hotel.name %></h3>
+                </div>
+                <div class="card-body">
+                    <div class="row">
+                        <div class="col-md-6">
+                            <img src="<%= hotel.image %>" class="img-fluid rounded mb-3" alt="<%= hotel.name %>">
+                            <h5>Hotel Details</h5>
+                            <p><strong>Price:</strong> $<%= hotel.price %>/night</p>
+                            <p><strong>Total Rooms:</strong> <%= hotel.totalRooms %></p>
+                            <% if(hotel.amenities && hotel.amenities.length > 0) { %>
+                                <p><strong>Amenities:</strong> <%= hotel.amenities.join(', ') %></p>
+                            <% } %>
+                        </div>
+                        <div class="col-md-6">
+                            <form action="/hotels/<%= hotel._id %>/book" method="POST">
+                                <div class="mb-3">
+                                    <label for="checkInDate" class="form-label">Check-in Date</label>
+                                    <input type="date" class="form-control" id="checkInDate" name="checkInDate" required min="<%= new Date().toISOString().split('T')[0] %>">
+                                </div>
+                                
+                                <div class="mb-3">
+                                    <label for="checkOutDate" class="form-label">Check-out Date</label>
+                                    <input type="date" class="form-control" id="checkOutDate" name="checkOutDate" required>
+                                </div>
+                                
+                                <div class="mb-3">
+                                    <label for="numberOfRooms" class="form-label">Number of Rooms</label>
+                                    <select class="form-control" id="numberOfRooms" name="numberOfRooms" required>
+                                        <% for(let i = 1; i <= Math.min(5, hotel.totalRooms); i++) { %>
+                                            <option value="<%= i %>"><%= i %> Room<%= i > 1 ? 's' : '' %></option>
+                                        <% } %>
+                                    </select>
+                                </div>
+                                
+                                <div class="mb-3">
+                                    <div id="priceCalculation" class="alert alert-info" style="display: none;">
+                                        <strong>Total Price: $<span id="totalPrice">0</span></strong>
+                                        <br>
+                                        <small id="priceBreakdown"></small>
+                                    </div>
+                                </div>
+                                
+                                <button type="submit" class="btn btn-primary btn-lg w-100">Proceed to Payment</button>
+                            </form>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script>
+    const pricePerNight = <%= hotel.price %>;
+    
+    function calculatePrice() {
+        const checkIn = new Date(document.getElementById('checkInDate').value);
+        const checkOut = new Date(document.getElementById('checkOutDate').value);
+        const rooms = parseInt(document.getElementById('numberOfRooms').value);
+        
+        if (checkIn && checkOut && checkOut > checkIn) {
+            const nights = Math.ceil((checkOut - checkIn) / (1000 * 60 * 60 * 24));
+            const totalPrice = pricePerNight * rooms * nights;
+            
+            document.getElementById('totalPrice').textContent = totalPrice;
+            document.getElementById('priceBreakdown').textContent = 
+                `${rooms} room${rooms > 1 ? 's' : ''} × ${nights} night${nights > 1 ? 's' : ''} × $${pricePerNight}/night`;
+            document.getElementById('priceCalculation').style.display = 'block';
+        } else {
+            document.getElementById('priceCalculation').style.display = 'none';
+        }
+    }
+    
+    document.getElementById('checkInDate').addEventListener('change', calculatePrice);
+    document.getElementById('checkOutDate').addEventListener('change', calculatePrice);
+    document.getElementById('numberOfRooms').addEventListener('change', calculatePrice);
+    
+    // Set minimum checkout date to be after checkin
+    document.getElementById('checkInDate').addEventListener('change', function() {
+        const checkInDate = new Date(this.value);
+        checkInDate.setDate(checkInDate.getDate() + 1);
+        document.getElementById('checkOutDate').min = checkInDate.toISOString().split('T')[0];
+    });
+</script>
+
+<%- include("partials/footer") %>

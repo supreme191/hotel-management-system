@@ -1,0 +1,28 @@
+<%- include("partials/header") %>
+
+<div class="container mt-4">
+    <h1 class="mb-4 text-center">My Managed Hotels</h1>
+    
+    <% if(hotels.length === 0) { %>
+        <div class="alert alert-info text-center">
+            You haven't listed any hotels yet. <a href="/hotels/new">Create one now!</a>
+        </div>
+    <% } %>
+
+    <div class="row row-cols-1 row-cols-md-3 g-4">
+        <% hotels.forEach(function(hotel){ %>
+            <div class="col">
+                <div class="card h-100 shadow-sm">
+                    <img src="<%= hotel.image %>" class="card-img-top" alt="<%= hotel.name %>">
+                    <div class="card-body">
+                        <h5 class="card-title"><%= hotel.name %></h5>
+                        <p class="card-text text-muted"><%= hotel.description.substring(0, 60) %>...</p>
+                        <a href="/hotels/<%= hotel._id %>" class="btn btn-primary btn-sm">Manage Hotel</a>
+                    </div>
+                </div>
+            </div>
+        <% }); %>
+    </div>
+</div>
+
+<%- include("partials/footer") %>
